@@ -1,34 +1,35 @@
 #include <Arduino.h>
-#include "ThermostatData.hpp"
 
-ThermostatData thermostatData;
-
+#include "ConnectivityUtils.hpp"
 #include "EventsDispatcher.hpp"
 #include "ShtUtils.hpp"
 #include "TftUtils.hpp"
+#include "ThermostatData.hpp"
 #include "ThermostatManager.hpp"
-#include "ConnectivityUtils.hpp"
+#include "Secrets.h"
+
+ShtUtils shtUtils;
+ThermostatManager thermostatManager;
+TftUtils tftUtils;
+ConnectivityUtils connectivityUtils(clientName, gatewayAddress, clientAdress);
+EventsDispatcher eventsDispatcher(&thermostatManager, &tftUtils, &connectivityUtils);
 
 void setup() {
     Serial.begin(115200);
     Serial.println();
-    setupConnectivity();
-    pinMode(RELAY_PIN, OUTPUT);
-    thermostatOff();
-    refreshShtMeasures(true);
-    initTft();
-    addEvent(EVENT_TYPES::CONNECTIVITY);
-    dispatchEvent();
+    thermostatManager.setup();
+    connectivityUtils.setupConnectivity();
+    shtUtils.refreshShtMeasures(true);
+    tftUtils.initTft();
+    // addEvent(EVENT_TYPES::CONNECTIVITY);
+    eventsDispatcher.dispatchEvent();
 }
 
 void loop() {
-    refreshShtMeasures();
-    getTopic();
-    detectToutch();
-    checkThermostatStatus();
-    //checkIfWiFiStatusHasChanged();
-    //server.handleClient();
-    dispatchEvent();
-    refreshData();
-    //MDNS.update();
+    shtUtils.refreshShtMeasures();
+    connectivityUtils.getTopic();
+    tftUtils.detectToutch();
+    thermostatManager.checkThermostatStatus();
+    eventsDispatcher.dispatchEvent();
+    connectivityUtils.refreshData();
 }
