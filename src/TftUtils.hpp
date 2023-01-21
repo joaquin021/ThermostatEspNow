@@ -13,6 +13,7 @@
 
 #include "EventUtils.hpp"
 #include "usergraphics.h"
+#include "Commons.hpp"
 
 #define TFT_CS 3
 #define TFT_DC 2
@@ -53,6 +54,7 @@ void drawUpDownButton() {
 
 void drawPowerButton() {
     Serial.println("TftUtils.hpp\t\t\tDraw power button");
+    debugln(thermostatData.getMode());
     if (strcmp(thermostatData.getMode(), "heat") == 0) {
         tft.drawBitmap(100, 275, powerIcon, 40, 40, ILI9341_WHITE);
     } else {

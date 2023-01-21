@@ -54,14 +54,14 @@ void ThermostatData::setAction(String newAction) { action = newAction; }
 char *ThermostatData::getMode() { return mode; }
 
 void ThermostatData::changeMode(const char *newMode, unsigned int length) {
-    strncpy(mode, newMode, length - 1);
-    mode[length - 1] = '\0';
+    strncpy(mode, newMode, length);
+    //mode[length - 1] = '\0';
 }
 
-void ThermostatData::changeMode(uint8_t *newMode, unsigned int length) {
+/*void ThermostatData::changeMode(uint8_t *newMode, unsigned int length) {
     memcpy(mode, newMode, length);
     mode[length] = '\0';
-}
+}*/
 
 bool ThermostatData::isConnectivityActive() { return connectivityActive; }
 

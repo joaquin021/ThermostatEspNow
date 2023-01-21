@@ -33,7 +33,7 @@ class ThermostatData {
     void setAction(String newAction);
     char *getMode();
     void changeMode(const char *newMode, unsigned int length);
-    void changeMode(uint8_t *newMode, unsigned int length);
+    //void changeMode(uint8_t *newMode, unsigned int length);
     bool isConnectivityActive();
     bool toggleConnectivity();
 };

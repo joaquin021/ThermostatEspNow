@@ -6,21 +6,21 @@
 #include "EventUtils.hpp"
 #include "TftUtils.hpp"
 #include "ThermostatManager.hpp"
+#include "ConnectivityUtils.hpp"
 
 void manageRoomMeasuresEvent() {
     updateRoomTemp();
-    //publishTemperature();
-    //publishHumidity();
+    publishTemperatureAndHumidity();
 }
 
 void manageTargetTemperatureEvent() {
     updateTargetTemp();
-    //publishTargetTemperature();
+    publishTargetTemperature();
 }
 
 void manageModeEvent() {
     drawPowerButton();
-    //publishStatus();
+    publishStatus();
 }
 
 void manageActionEvent() {
@@ -30,7 +30,7 @@ void manageActionEvent() {
         thermostatOff();
     }
     updateCircleColor();
-    //publishStatus();
+    publishStatus();
 }
 
 void manageConnectivityEvent() {
