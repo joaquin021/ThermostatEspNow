@@ -1,28 +1,25 @@
 #include "ConnectivityUtils.hpp"
 
-unsigned long NEXT_REFRESH_TIME = millis();
-unsigned long NEXT_REFRESH_PERIOD = 300000;
+unsigned long NEXT_REFRESH_TIME_FOR_REFRESH_DATA = millis();
+unsigned long NEXT_REFRESH_PERIOD_FOR_REFRESH_DATA = 300000;
 
-unsigned long NEXT_REFRESH_TIME2 = millis();
-unsigned long NEXT_REFRESH_PERIOD2 = 1000;
+unsigned long NEXT_REFRESH_TIME_FOR_CHECK_TOPICS = millis();
+unsigned long NEXT_REFRESH_PERIOD_FOR_CHECK_TOPICS = 1000;
 
 RequestUtils requestUtils = RequestUtils::getInstance();
 ResponseUtils responseUtils = ResponseUtils::getInstance();
 
 void opResponseHandler(response *response, response_OpResponse *opResponse, int operationNumber) {
     if (response->message_type == 631 && opResponse->result_code == 0) {
-        debugln("+++++++++++++++++++++++++++++++++++++++++++++++++++++");
+        logDebugln("+++++++++++++++++++++++++++++++++++++++++++++++++++++");
         if (operationNumber == 0) {
-            debugln(opResponse->payload);
             ThermostatData::getInstance().changeMode(opResponse->payload);
             EventQueue::getInstance().addEvent(EVENT_TYPES::MODE);
         } else {
-            char auxTargetTemp[strlen(opResponse->payload)];
-            memcpy(&auxTargetTemp, opResponse->payload, strlen(opResponse->payload));
-            ThermostatData::getInstance().setTargetTemp(String(auxTargetTemp).toFloat());
+            ThermostatData::getInstance().setTargetTemp(atof(opResponse->payload));
             EventQueue::getInstance().addEvent(EVENT_TYPES::TARGET_TEMPERATURE);
         }
-        debugln("-------------------------------------------------------");
+        logDebugln("-------------------------------------------------------");
     }
 }
 
@@ -32,13 +29,20 @@ void espNowRecvCallBack(const uint8_t *mac_addr, const uint8_t *data, int data_l
 
 ConnectivityUtils::ConnectivityUtils(const char *clientName, uint8_t *gatewayAddress, uint8_t *clientAdress) {
     this->clientName = clientName;
-    this->gatewayAddress = gatewayAddress;
-    this->clientAdress = clientAdress;
+    memcpy(this->gatewayAddress, gatewayAddress, 6);
+    memcpy(this->clientAdress, clientAdress, 6);
 }
 
 void ConnectivityUtils::setupConnectivity() {
-    setupWiFiForEspNow();
-    espNowService.setup(espNowSendCallBackDummy, espNowRecvCallBack);
+    if (ThermostatData::getInstance().isConnectivityActive()) {
+        setupWiFiForEspNow();
+        espNowService.setup(espNowSendCallBackDummy, espNowRecvCallBack);
+        refreshData(true);
+    }
+}
+
+void ConnectivityUtils::disconnect() {
+    WiFi.mode(WIFI_OFF);
 }
 
 void ConnectivityUtils::publishTemperatureAndHumidity() {
@@ -62,22 +66,22 @@ void ConnectivityUtils::publishStatus() {
     sendRequest(&request);
 }
 
-void ConnectivityUtils::getTopic() {
-    if (NEXT_REFRESH_TIME2 < millis()) {
+void ConnectivityUtils::checkTopics() {
+    if (NEXT_REFRESH_TIME_FOR_CHECK_TOPICS < millis()) {
         request request = requestUtils.createRequest(clientName, clientAdress, 631);
         requestUtils.buildSubscribeOperation(&request, "chg/mode");
         requestUtils.buildSubscribeOperation(&request, "chg/tgTemp");
         sendRequest(&request);
-        NEXT_REFRESH_TIME2 = millis() + NEXT_REFRESH_PERIOD2;
+        NEXT_REFRESH_TIME_FOR_CHECK_TOPICS = millis() + NEXT_REFRESH_PERIOD_FOR_CHECK_TOPICS;
     }
 }
 
 void ConnectivityUtils::refreshData(bool force) {
-    if (force || NEXT_REFRESH_TIME < millis()) {
+    if (force || NEXT_REFRESH_TIME_FOR_REFRESH_DATA < millis()) {
         publishStatus();
         publishTargetTemperature();
         publishTemperatureAndHumidity();
-        NEXT_REFRESH_TIME = millis() + NEXT_REFRESH_PERIOD;
+        NEXT_REFRESH_TIME_FOR_REFRESH_DATA = millis() + NEXT_REFRESH_PERIOD_FOR_REFRESH_DATA;
     }
 }
 
@@ -112,7 +116,7 @@ void ConnectivityUtils::buildAction(request *request) {
 }
 
 void ConnectivityUtils::sendRequest(request *request) {
-    uint8_t serializedBuffer[ESPNOW_BUFFERSIZE];
-    int serializedLen = requestUtils.serialize(serializedBuffer, request);
-    espNowService.send(gatewayAddress, serializedBuffer, serializedLen);
+    if (ThermostatData::getInstance().isConnectivityActive()) {
+        espNowService.sendRequest(gatewayAddress, request);
+    }
 }

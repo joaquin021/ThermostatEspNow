@@ -8,11 +8,11 @@ EventsDispatcher::EventsDispatcher(ThermostatManager *thermostatManager, TftUtil
 
 void EventsDispatcher::dispatchEvent() {
     if (!EventQueue::getInstance().isEmpty()) {
-        Serial.println("EventsDispatcher.hpp\t\t########## Dispatching events ##########");
+        logDebugln("EventsDispatcher.hpp\t\t########## Dispatching events ##########");
         while (!EventQueue::getInstance().isEmpty()) {
             EVENT_TYPES eventType = EventQueue::getInstance().getFrontEvent();
-            Serial.printf("EventsDispatcher.hpp\t\t---> Queue size: %i\n", EventQueue::getInstance().size());
-            Serial.println("EventsDispatcher.hpp\t\t---> Dispatch event: " + EventQueue::getInstance().getEventDescription(eventType));
+            logDebugf("EventsDispatcher.hpp\t\t---> Queue size: %i\n", EventQueue::getInstance().size());
+            logDebugln("EventsDispatcher.hpp\t\t---> Dispatch event: " + EventQueue::getInstance().getEventDescription(eventType));
             switch (eventType) {
                 case EVENT_TYPES::ROOM_MEASURES:
                     manageRoomMeasuresEvent();
@@ -34,7 +34,7 @@ void EventsDispatcher::dispatchEvent() {
             }
             EventQueue::getInstance().removeFrontEvent();
         }
-        Serial.println("EventsDispatcher.hpp\t\t########################################");
+        logDebugln("EventsDispatcher.hpp\t\t########################################");
     }
 }
 
@@ -64,5 +64,11 @@ void EventsDispatcher::manageActionEvent() {
 }
 
 void EventsDispatcher::manageConnectivityEvent() {
-    tftUtils->drawWiFiButton(ILI9341_DARKCYAN);
+    if (ThermostatData::getInstance().isConnectivityActive()) {
+        tftUtils->drawWiFiButton(ILI9341_DARKCYAN);
+        connectivityUtils->setupConnectivity();
+    } else {
+        tftUtils->drawWiFiButton(ILI9341_ULTRA_DARKGREY);
+        connectivityUtils->disconnect();
+    }
 }

@@ -14,6 +14,8 @@
 #include "ThermostatData.hpp"
 #include "usergraphics.h"
 
+#define ILI9341_ULTRA_DARKGREY 0x632C
+
 class TftUtils {
    private:
     Adafruit_ILI9341 tft;

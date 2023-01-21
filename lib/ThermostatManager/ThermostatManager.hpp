@@ -2,6 +2,7 @@
 #define __THERMOSTAT_MANAGER_HPP
 
 #include "Arduino.h"
+#include "Commons.hpp"
 #include "EventQueue.hpp"
 #include "ThermostatData.hpp"
 

@@ -3,6 +3,7 @@
 
 #include <Arduino.h>
 
+#include "Commons.hpp"
 #include "ConnectivityUtils.hpp"
 #include "EventQueue.hpp"
 #include "TftUtils.hpp"

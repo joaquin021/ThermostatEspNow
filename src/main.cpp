@@ -1,12 +1,13 @@
 #include <Arduino.h>
 
+#include "Commons.hpp"
 #include "ConnectivityUtils.hpp"
+#include "EventQueue.hpp"
 #include "EventsDispatcher.hpp"
+#include "Secrets.h"
 #include "ShtUtils.hpp"
 #include "TftUtils.hpp"
-#include "ThermostatData.hpp"
 #include "ThermostatManager.hpp"
-#include "Secrets.h"
 
 ShtUtils shtUtils;
 ThermostatManager thermostatManager;
@@ -16,18 +17,17 @@ EventsDispatcher eventsDispatcher(&thermostatManager, &tftUtils, &connectivityUt
 
 void setup() {
     Serial.begin(115200);
-    Serial.println();
+    logDebugln("");
     thermostatManager.setup();
-    connectivityUtils.setupConnectivity();
+    EventQueue::getInstance().addEvent(EVENT_TYPES::CONNECTIVITY);
     shtUtils.refreshShtMeasures(true);
     tftUtils.initTft();
-    // addEvent(EVENT_TYPES::CONNECTIVITY);
     eventsDispatcher.dispatchEvent();
 }
 
 void loop() {
     shtUtils.refreshShtMeasures();
-    connectivityUtils.getTopic();
+    connectivityUtils.checkTopics();
     tftUtils.detectToutch();
     thermostatManager.checkThermostatStatus();
     eventsDispatcher.dispatchEvent();

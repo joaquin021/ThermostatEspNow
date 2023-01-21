@@ -5,6 +5,8 @@
 
 #include <queue>
 
+#include "Commons.hpp"
+
 enum EVENT_TYPES { ROOM_MEASURES,
                    TARGET_TEMPERATURE,
                    MODE,
@@ -28,7 +30,6 @@ class EventQueue {
    private:
     EventQueue() {}
     std::queue<EVENT_TYPES> events;
-    
 };
 
 #endif

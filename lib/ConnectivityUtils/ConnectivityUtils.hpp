@@ -1,6 +1,7 @@
 #ifndef __CONNECTIVITY_UTILS_HPP
 #define __CONNECTIVITY_UTILS_HPP
 
+#include "Commons.hpp"
 #include "EspNowService.hpp"
 #include "EventQueue.hpp"
 #include "RequestUtils.hpp"
@@ -11,8 +12,8 @@ class ConnectivityUtils {
    private:
     EspNowService espNowService;
     const char *clientName;
-    uint8_t *gatewayAddress;
-    uint8_t *clientAdress;
+    uint8_t gatewayAddress[6];
+    uint8_t clientAdress[6];
     void buildTemperatureRequest(request *request);
     void buildHumidityRequest(request *request);
     void buildTargetTemperatureRequest(request *request);
@@ -24,10 +25,11 @@ class ConnectivityUtils {
    public:
     ConnectivityUtils(const char *clientName, uint8_t *gatewayAddress, uint8_t *clientAdress);
     void setupConnectivity();
+    void disconnect();
     void publishTemperatureAndHumidity();
     void publishTargetTemperature();
     void publishStatus();
-    void getTopic();
+    void checkTopics();
     void refreshData(bool force = false);
 };
 

@@ -8,9 +8,8 @@
 #define TFT_MISO 5
 #define TS_CS 0
 
-#define ILI9341_ULTRA_DARKGREY 0x632C
 /*______Assign pressure_______*/
-#define MINPRESSURE 10
+#define MINPRESSURE 100
 #define MAXPRESSURE 2000
 /*_______Assigned______*/
 
@@ -47,7 +46,7 @@ void TftUtils::drawMainScreen() {
 }
 
 void TftUtils::updateCircleColor() {
-    Serial.println("TftUtils.hpp\t\t\tDraw circles color.");
+    logDebugln("TftUtils.hpp\t\t\tDraw circles color.");
     // draw big circle
     unsigned char i;
     if (strcmp(ThermostatData::getInstance().getAction(), "heating") == 0) {
@@ -87,7 +86,7 @@ void TftUtils::updateCircleColor() {
 }
 
 void TftUtils::updateTargetTemp() {
-    Serial.println("TftUtils.hpp\t\t\tDraw target temperature.");
+    logDebugln("TftUtils.hpp\t\t\tDraw target temperature.");
     int16_t x1, y1;
     uint16_t w, h;
     char targetTempAux[5];
@@ -101,7 +100,7 @@ void TftUtils::updateTargetTemp() {
 }
 
 void TftUtils::updateRoomTemp() {
-    Serial.println("TftUtils.hpp\t\t\tDraw room temperature.");
+    logDebugln("TftUtils.hpp\t\t\tDraw room temperature.");
     int16_t x1, y1;
     uint16_t w, h;
     char currentValue[5];
@@ -122,8 +121,7 @@ void TftUtils::drawUpDownButton() {
 }
 
 void TftUtils::drawPowerButton() {
-    Serial.println("TftUtils.hpp\t\t\tDraw power button");
-    debugln(ThermostatData::getInstance().getMode());
+    logDebugln("TftUtils.hpp\t\t\tDraw power button");
     if (strcmp(ThermostatData::getInstance().getMode(), "heat") == 0) {
         tft.drawBitmap(100, 275, powerIcon, 40, 40, ILI9341_WHITE);
     } else {
@@ -132,13 +130,8 @@ void TftUtils::drawPowerButton() {
 }
 
 void TftUtils::drawWiFiButton(int wifiButtonColor) {
-    Serial.println("TftUtils.hpp\t\t\tDraw WiFi button.");
+    logDebugln("TftUtils.hpp\t\t\tDraw WiFi button.");
     tft.drawBitmap(10, 10, wifiIcon, 24, 24, wifiButtonColor);
-    // if (WiFi.getMode() == 2 || WiFi.getMode() == 3) {
-    //    tft.fillCircle(38, 24, 3, ILI9341_OLIVE);
-    //} else {
-    //    tft.fillCircle(38, 24, 3, ILI9341_BLACK);
-    //}
 }
 
 void TftUtils::detectToutch() {
@@ -190,6 +183,7 @@ void TftUtils::detectButtons(int x, int y) {
     }
     // wifi button
     else if (x <= 30 && y <= 30) {
+        ThermostatData::getInstance().toggleConnectivity();
         EventQueue::getInstance().addEvent(EVENT_TYPES::CONNECTIVITY);
     }
 }

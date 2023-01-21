@@ -33,3 +33,10 @@ char *ThermostatData::getMode() { return mode; }
 void ThermostatData::changeMode(const char *newMode) {
     strcpy(mode, newMode);
 }
+
+bool ThermostatData::isConnectivityActive() { return connectivityActive; }
+
+bool ThermostatData::toggleConnectivity() {
+    connectivityActive = !connectivityActive;
+    return connectivityActive;
+}

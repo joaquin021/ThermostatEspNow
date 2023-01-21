@@ -4,7 +4,7 @@ String EVENT_TYPES_DESCRIPTION[] = {"ROOM_MEASURES", "TARGET_TEMPERATURE", "MODE
 
 void EventQueue::addEvent(EVENT_TYPES eventType) {
     events.push(eventType);
-    Serial.println("EventUtils.hpp\t\t\tAdded event: " + EVENT_TYPES_DESCRIPTION[eventType]);
+    logDebugln("EventUtils.hpp\t\t\tAdded event: " + EVENT_TYPES_DESCRIPTION[eventType]);
 }
 
 EVENT_TYPES EventQueue::getFrontEvent() {

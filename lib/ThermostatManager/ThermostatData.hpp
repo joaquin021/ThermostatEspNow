@@ -13,6 +13,7 @@ class ThermostatData {
     float targetTemp = 21;
     char action[8] = "off";
     char mode[5] = "off";
+    bool connectivityActive = true;
     ThermostatData() {}
 
    public:
@@ -34,6 +35,8 @@ class ThermostatData {
     void setAction(const char *newAction);
     char *getMode();
     void changeMode(const char *newMode);
+    bool isConnectivityActive();
+    bool toggleConnectivity();
 };
 
 #endif

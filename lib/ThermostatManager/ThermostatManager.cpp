@@ -29,12 +29,12 @@ void ThermostatManager::checkThermostatStatus() {
 
 void ThermostatManager::thermostatHeating() {
     digitalWrite(RELAY_PIN, HIGH);
-    Serial.println("ThermostatManager.hpp\t\tRelay HIGH. Thermostat heating.");
+    logDebugln("ThermostatManager.hpp\t\tRelay HIGH. Thermostat heating.");
 }
 
 void ThermostatManager::thermostatOff() {
     digitalWrite(RELAY_PIN, LOW);
-    Serial.println("ThermostatManager.hpp\t\tRelay LOW. Thermostat off.");
+    logDebugln("ThermostatManager.hpp\t\tRelay LOW. Thermostat off.");
 }
 
 boolean ThermostatManager::temperatureAboveTarget() {
