@@ -17,10 +17,10 @@ class ConnectivityUtils {
     void buildTemperatureRequest(request *request);
     void buildHumidityRequest(request *request);
     void buildTargetTemperatureRequest(request *request);
-    void buildAvailability(request *request);
+    void buildAvailability(request *request, const char *status);
     void buildMode(request *request);
     void buildAction(request *request);
-    void sendRequest(request *request);
+    void sendRequest(request *request, bool ignoreConectivityStatus = false);
 
    public:
     ConnectivityUtils(const char *clientName, uint8_t *gatewayAddress, uint8_t *clientAdress);
@@ -28,7 +28,7 @@ class ConnectivityUtils {
     void disconnect();
     void publishTemperatureAndHumidity();
     void publishTargetTemperature();
-    void publishStatus();
+    void publishStatus(bool ignoreConectivityStatus = false);
     void checkTopics();
     void refreshData(bool force = false);
 };

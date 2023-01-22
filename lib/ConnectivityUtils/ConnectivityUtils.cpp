@@ -9,9 +9,20 @@ unsigned long NEXT_REFRESH_PERIOD_FOR_CHECK_TOPICS = 1000;
 RequestUtils requestUtils = RequestUtils::getInstance();
 ResponseUtils responseUtils = ResponseUtils::getInstance();
 
+char lastStatusMessage[6] = "none";
+
+void manageSendResult(int result) {
+    if (result == 0 && strcmp(lastStatusMessage, "true") != 0) {
+        strcpy(lastStatusMessage, "true");
+        EventQueue::getInstance().addEvent(EVENT_TYPES::MESSAGE_OK);
+    } else if (result != 0 && strcmp(lastStatusMessage, "false") != 0) {
+        strcpy(lastStatusMessage, "false");
+        EventQueue::getInstance().addEvent(EVENT_TYPES::MESSAGE_FAILED);
+    }
+}
+
 void opResponseHandler(response *response, response_OpResponse *opResponse, int operationNumber) {
     if (response->message_type == 631 && opResponse->result_code == 0) {
-        logDebugln("+++++++++++++++++++++++++++++++++++++++++++++++++++++");
         if (operationNumber == 0) {
             ThermostatData::getInstance().changeMode(opResponse->payload);
             EventQueue::getInstance().addEvent(EVENT_TYPES::MODE);
@@ -19,8 +30,13 @@ void opResponseHandler(response *response, response_OpResponse *opResponse, int 
             ThermostatData::getInstance().setTargetTemp(atof(opResponse->payload));
             EventQueue::getInstance().addEvent(EVENT_TYPES::TARGET_TEMPERATURE);
         }
-        logDebugln("-------------------------------------------------------");
     }
+}
+
+void espNowSendCallBack(const uint8_t *mac_addr, esp_now_send_status_t status) {
+    logTrace("Send message status:\t");
+    logTraceln(status == 0 ? "Sent Successfully" : "Sent Failed");
+    manageSendResult(status);
 }
 
 void espNowRecvCallBack(const uint8_t *mac_addr, const uint8_t *data, int data_len) {
@@ -36,13 +52,17 @@ ConnectivityUtils::ConnectivityUtils(const char *clientName, uint8_t *gatewayAdd
 void ConnectivityUtils::setupConnectivity() {
     if (ThermostatData::getInstance().isConnectivityActive()) {
         setupWiFiForEspNow();
-        espNowService.setup(espNowSendCallBackDummy, espNowRecvCallBack);
+        espNowService.setup(espNowSendCallBack, espNowRecvCallBack);
         refreshData(true);
     }
+    strcpy(lastStatusMessage, "none");
 }
 
 void ConnectivityUtils::disconnect() {
+    publishStatus(true);
+    delay(500);
     WiFi.mode(WIFI_OFF);
+    strcpy(lastStatusMessage, "none");
 }
 
 void ConnectivityUtils::publishTemperatureAndHumidity() {
@@ -58,12 +78,12 @@ void ConnectivityUtils::publishTargetTemperature() {
     sendRequest(&request);
 }
 
-void ConnectivityUtils::publishStatus() {
+void ConnectivityUtils::publishStatus(bool ignoreConectivityStatus) {
     request request = requestUtils.createRequest(clientName, clientAdress, 1);
-    buildAvailability(&request);
+    buildAvailability(&request, ThermostatData::getInstance().isConnectivityActive() ? "online" : "offline");
     buildMode(&request);
     buildAction(&request);
-    sendRequest(&request);
+    sendRequest(&request, ignoreConectivityStatus);
 }
 
 void ConnectivityUtils::checkTopics() {
@@ -103,8 +123,8 @@ void ConnectivityUtils::buildTargetTemperatureRequest(request *request) {
     requestUtils.buildSendOperation(request, temperature, "targetTemp");
 }
 
-void ConnectivityUtils::buildAvailability(request *request) {
-    requestUtils.buildSendOperation(request, "online", "available");
+void ConnectivityUtils::buildAvailability(request *request, const char *status) {
+    requestUtils.buildSendOperation(request, status, "available");
 }
 
 void ConnectivityUtils::buildMode(request *request) {
@@ -115,8 +135,9 @@ void ConnectivityUtils::buildAction(request *request) {
     requestUtils.buildSendOperation(request, ThermostatData::getInstance().getAction(), "action");
 }
 
-void ConnectivityUtils::sendRequest(request *request) {
-    if (ThermostatData::getInstance().isConnectivityActive()) {
-        espNowService.sendRequest(gatewayAddress, request);
+void ConnectivityUtils::sendRequest(request *request, bool ignoreConectivityStatus) {
+    if (ignoreConectivityStatus || ThermostatData::getInstance().isConnectivityActive()) {
+        int result = espNowService.sendRequest(gatewayAddress, request);
+        manageSendResult(result);
     }
 }

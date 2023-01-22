@@ -9,7 +9,7 @@
 #define TS_CS 0
 
 /*______Assign pressure_______*/
-#define MINPRESSURE 100
+#define MINPRESSURE 400
 #define MAXPRESSURE 2000
 /*_______Assigned______*/
 

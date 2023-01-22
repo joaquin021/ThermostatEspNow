@@ -20,6 +20,8 @@ class EventsDispatcher {
     void manageModeEvent();
     void manageActionEvent();
     void manageConnectivityEvent();
+    void manageMessageOk();
+    void manageMessageFailed();
 
    public:
     EventsDispatcher(ThermostatManager *thermostatManager, TftUtils *tftUtils, ConnectivityUtils *connectivityUtils);

@@ -11,7 +11,9 @@ enum EVENT_TYPES { ROOM_MEASURES,
                    TARGET_TEMPERATURE,
                    MODE,
                    ACTION,
-                   CONNECTIVITY };
+                   CONNECTIVITY,
+                   MESSAGE_OK,
+                   MESSAGE_FAILED };
 
 class EventQueue {
    public:

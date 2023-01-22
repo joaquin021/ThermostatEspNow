@@ -29,6 +29,12 @@ void EventsDispatcher::dispatchEvent() {
                 case EVENT_TYPES::CONNECTIVITY:
                     manageConnectivityEvent();
                     break;
+                case EVENT_TYPES::MESSAGE_OK:
+                    manageMessageOk();
+                    break;
+                case EVENT_TYPES::MESSAGE_FAILED:
+                    manageMessageFailed();
+                    break;
                 default:
                     break;
             }
@@ -71,4 +77,12 @@ void EventsDispatcher::manageConnectivityEvent() {
         tftUtils->drawWiFiButton(ILI9341_ULTRA_DARKGREY);
         connectivityUtils->disconnect();
     }
+}
+
+void EventsDispatcher::manageMessageOk() {
+    tftUtils->drawWiFiButton(ILI9341_WHITE);
+}
+
+void EventsDispatcher::manageMessageFailed() {
+    tftUtils->drawWiFiButton(ILI9341_RED);
 }

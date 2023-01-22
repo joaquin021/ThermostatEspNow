@@ -1,6 +1,6 @@
 #include "EventQueue.hpp"
 
-String EVENT_TYPES_DESCRIPTION[] = {"ROOM_MEASURES", "TARGET_TEMPERATURE", "MODE", "ACTION", "CONECTIVITY"};
+String EVENT_TYPES_DESCRIPTION[] = {"ROOM_MEASURES", "TARGET_TEMPERATURE", "MODE", "ACTION", "CONECTIVITY", "MESSAGE_OK", "MESSAGE_FAILED"};
 
 void EventQueue::addEvent(EVENT_TYPES eventType) {
     events.push(eventType);
