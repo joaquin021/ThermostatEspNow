@@ -22,7 +22,7 @@ void manageSendResult(int result) {
 }
 
 void opResponseHandler(response *response, response_OpResponse *opResponse, int operationNumber) {
-    if (response->message_type == 631 && opResponse->result_code == 0) {
+    if (response->message_type == 631 && opResponse->result_code == response_Result_OK) {
         if (operationNumber == 0) {
             ThermostatData::getInstance().changeMode(opResponse->payload);
             EventQueue::getInstance().addEvent(EVENT_TYPES::MODE);
@@ -66,20 +66,20 @@ void ConnectivityUtils::disconnect() {
 }
 
 void ConnectivityUtils::publishTemperatureAndHumidity() {
-    request request = requestUtils.createRequest(clientName, clientAdress, 3);
+    request request = requestUtils.createRequest(clientName, clientAdress, gatewayAddress, 3);
     buildTemperatureRequest(&request);
     buildHumidityRequest(&request);
     sendRequest(&request);
 }
 
 void ConnectivityUtils::publishTargetTemperature() {
-    request request = requestUtils.createRequest(clientName, clientAdress, 2);
+    request request = requestUtils.createRequest(clientName, clientAdress, gatewayAddress, 2);
     buildTargetTemperatureRequest(&request);
     sendRequest(&request);
 }
 
 void ConnectivityUtils::publishStatus(bool ignoreConectivityStatus) {
-    request request = requestUtils.createRequest(clientName, clientAdress, 1);
+    request request = requestUtils.createRequest(clientName, clientAdress, gatewayAddress, 1);
     buildAvailability(&request, ThermostatData::getInstance().isConnectivityActive() ? "online" : "offline");
     buildMode(&request);
     buildAction(&request);
@@ -88,7 +88,7 @@ void ConnectivityUtils::publishStatus(bool ignoreConectivityStatus) {
 
 void ConnectivityUtils::checkTopics() {
     if (NEXT_REFRESH_TIME_FOR_CHECK_TOPICS < millis()) {
-        request request = requestUtils.createRequest(clientName, clientAdress, 631);
+        request request = requestUtils.createRequest(clientName, clientAdress, gatewayAddress, 631);
         requestUtils.buildSubscribeOperation(&request, "chg/mode");
         requestUtils.buildSubscribeOperation(&request, "chg/tgTemp");
         sendRequest(&request);
@@ -137,7 +137,7 @@ void ConnectivityUtils::buildAction(request *request) {
 
 void ConnectivityUtils::sendRequest(request *request, bool ignoreConectivityStatus) {
     if (ignoreConectivityStatus || ThermostatData::getInstance().isConnectivityActive()) {
-        int result = espNowService.sendRequest(gatewayAddress, request);
+        int result = espNowService.sendRequest(request);
         manageSendResult(result);
     }
 }
