@@ -4,7 +4,7 @@ unsigned long NEXT_REFRESH_TIME_FOR_REFRESH_DATA = millis();
 unsigned long NEXT_REFRESH_PERIOD_FOR_REFRESH_DATA = 300000;
 
 unsigned long NEXT_REFRESH_TIME_FOR_CHECK_TOPICS = millis();
-unsigned long NEXT_REFRESH_PERIOD_FOR_CHECK_TOPICS = 1000;
+unsigned long NEXT_REFRESH_PERIOD_FOR_CHECK_TOPICS = 300000;
 
 RequestUtils requestUtils = RequestUtils::getInstance();
 ResponseUtils responseUtils = ResponseUtils::getInstance();
@@ -23,10 +23,10 @@ void manageSendResult(int result) {
 
 void opResponseHandler(response *response, response_OpResponse *opResponse, int operationNumber) {
     if (response->message_type == 631 && opResponse->result_code == response_Result_OK) {
-        if (operationNumber == 0) {
+        if (opResponse->operation_type == 1) {
             ThermostatData::getInstance().changeMode(opResponse->payload);
             EventQueue::getInstance().addEvent(EVENT_TYPES::MODE);
-        } else {
+        } else if (opResponse->operation_type == 2) {
             ThermostatData::getInstance().setTargetTemp(atof(opResponse->payload));
             EventQueue::getInstance().addEvent(EVENT_TYPES::TARGET_TEMPERATURE);
         }
@@ -89,8 +89,8 @@ void ConnectivityUtils::publishStatus(bool ignoreConectivityStatus) {
 void ConnectivityUtils::checkTopics() {
     if (NEXT_REFRESH_TIME_FOR_CHECK_TOPICS < millis()) {
         request request = requestUtils.createRequest(clientName, clientAdress, gatewayAddress, 631);
-        requestUtils.buildSubscribeOperation(&request, "chg/mode");
-        requestUtils.buildSubscribeOperation(&request, "chg/tgTemp");
+        requestUtils.buildSubscribeOperation(&request, "chg/mode", 1);
+        requestUtils.buildSubscribeOperation(&request, "chg/tgTemp", 2);
         sendRequest(&request);
         NEXT_REFRESH_TIME_FOR_CHECK_TOPICS = millis() + NEXT_REFRESH_PERIOD_FOR_CHECK_TOPICS;
     }
