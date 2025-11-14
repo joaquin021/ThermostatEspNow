@@ -41,7 +41,18 @@ void TftUtils::drawMainScreen() {
     updateCircleColor();
     drawUpDownButton();
     drawPowerButton();
-    drawWiFiButton(ILI9341_ULTRA_DARKGREY);
+
+    // Determine WiFi icon color based on connectivity state
+    int wifiColor;
+    if (!ThermostatData::getInstance().isConnectivityActive()) {
+        wifiColor = WIFI_COLOR_DISCONNECTED;
+    } else if (WiFi.status() != WL_CONNECTED) {
+        wifiColor = WIFI_COLOR_CONNECTING;
+    } else {
+        wifiColor = WIFI_COLOR_CONNECTED;
+    }
+    drawWiFiButton(wifiColor);
+
     updateTargetTemp();
 }
 

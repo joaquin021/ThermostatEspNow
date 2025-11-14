@@ -8,6 +8,8 @@ unsigned long NEXT_REFRESH_PERIOD_FOR_REFRESH_DATA = 300000;
 unsigned long NEXT_REFRESH_TIME_FOR_CHECK_TOPICS = millis();
 unsigned long NEXT_REFRESH_PERIOD_FOR_CHECK_TOPICS = 100;  // Check every 100 ms for MQTT loop
 
+unsigned long NEXT_CONNECTIVITY_RETRY_PERIOD = 30000;  // Retry WiFi/MQTT every 30 seconds to avoid blocking
+
 char lastStatusMessage[6] = "none";
 
 // Static instance pointer for callback
@@ -35,19 +37,14 @@ void ConnectivityUtils::connectWiFi() {
     WiFi.mode(WIFI_STA);
     WiFi.begin(config.wifiSSID, config.wifiPassword);
 
-    int attempts = 0;
-    while (WiFi.status() != WL_CONNECTED && attempts < 20) {
-        delay(500);
-        logInfo(".");
-        attempts++;
-    }
+    // Single attempt to avoid blocking the thermostat (500ms max)
+    delay(500);
 
     if (WiFi.status() == WL_CONNECTED) {
-        logInfoln("");
         logInfo("WiFi connected! IP: ");
         logInfoln(WiFi.localIP());
     } else {
-        logErrorln("WiFi connection failed!");
+        logErrorln("WiFi connection failed! Will retry in 30 seconds.");
     }
 }
 
@@ -212,9 +209,10 @@ void ConnectivityUtils::checkTopics() {
         if (ThermostatData::getInstance().isConnectivityActive()) {
             if (!mqttClient->connected()) {
                 unsigned long now = millis();
-                if (now - lastReconnectAttempt > 5000) {  // Try to reconnect every 5 seconds
+                // Retry every 30 seconds to avoid blocking the thermostat
+                if (now - lastReconnectAttempt > NEXT_CONNECTIVITY_RETRY_PERIOD) {
                     lastReconnectAttempt = now;
-                    logInfoln("Attempting MQTT reconnection...");
+                    logInfoln("Attempting WiFi/MQTT reconnection...");
                     if (WiFi.status() != WL_CONNECTED) {
                         connectWiFi();
                     }

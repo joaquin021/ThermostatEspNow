@@ -8,6 +8,7 @@
 #include <Fonts/FreeSansBold24pt7b.h>
 #include <Fonts/FreeSansBold9pt7b.h>
 #include <XPT2046_Touchscreen.h>
+#include <WiFi.h>
 
 #include "Commons.hpp"
 #include "EventQueue.hpp"
@@ -15,6 +16,11 @@
 #include "usergraphics.h"
 
 #define ILI9341_ULTRA_DARKGREY 0x632C
+
+// WiFi status colors
+#define WIFI_COLOR_DISCONNECTED ILI9341_DARKGREY
+#define WIFI_COLOR_CONNECTING ILI9341_YELLOW
+#define WIFI_COLOR_CONNECTED ILI9341_WHITE
 
 class TftUtils {
    private:

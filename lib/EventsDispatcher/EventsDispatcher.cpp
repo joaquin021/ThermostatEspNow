@@ -71,18 +71,18 @@ void EventsDispatcher::manageActionEvent() {
 
 void EventsDispatcher::manageConnectivityEvent() {
     if (ThermostatData::getInstance().isConnectivityActive()) {
-        tftUtils->drawWiFiButton(ILI9341_DARKCYAN);
+        tftUtils->drawWiFiButton(WIFI_COLOR_CONNECTING);
         connectivityUtils->setupConnectivity();
     } else {
-        tftUtils->drawWiFiButton(ILI9341_ULTRA_DARKGREY);
+        tftUtils->drawWiFiButton(WIFI_COLOR_DISCONNECTED);
         connectivityUtils->disconnect();
     }
 }
 
 void EventsDispatcher::manageMessageOk() {
-    tftUtils->drawWiFiButton(ILI9341_WHITE);
+    tftUtils->drawWiFiButton(WIFI_COLOR_CONNECTED);
 }
 
 void EventsDispatcher::manageMessageFailed() {
-    tftUtils->drawWiFiButton(ILI9341_RED);
+    tftUtils->drawWiFiButton(WIFI_COLOR_CONNECTING);
 }
