@@ -3,7 +3,7 @@
 unsigned long NEXT_LOAD_SENSOR_TIME = 0;
 unsigned long NEXT_LOAD_SENSOR_PERIOD = 60000;
 
-ShtUtils::ShtUtils(): sht30(0x45){}
+ShtUtils::ShtUtils(): sht30(0x44){}
 
 void ShtUtils::refreshShtMeasures(bool resetSensorTime) {
     if (NEXT_LOAD_SENSOR_TIME < millis()) {

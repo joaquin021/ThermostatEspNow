@@ -9,10 +9,22 @@
 #include "TftUtils.hpp"
 #include "ThermostatManager.hpp"
 
+// Create connectivity configuration from secrets
+ConnectivityConfig connectivityConfig = {
+    .wifiSSID = WIFI_SSID,
+    .wifiPassword = WIFI_PASSWORD,
+    .mqttBroker = MQTT_BROKER,
+    .mqttPort = MQTT_PORT,
+    .mqttUser = MQTT_USER,
+    .mqttPassword = MQTT_PASSWORD,
+    .mqttBaseTopic = MQTT_BASE_TOPIC,
+    .clientName = clientName
+};
+
 ShtUtils shtUtils;
 ThermostatManager thermostatManager;
 TftUtils tftUtils;
-ConnectivityUtils connectivityUtils(clientName, gatewayAddress, clientAdress);
+ConnectivityUtils connectivityUtils(connectivityConfig);
 EventsDispatcher eventsDispatcher(&thermostatManager, &tftUtils, &connectivityUtils);
 
 void setup() {

@@ -1,4 +1,4 @@
-# ThermostatEspNow
+# ThermostatMqtt
 
 This project uses the hardware listed below:  
 - ESP32-C3-DevKitM-1 development board  
